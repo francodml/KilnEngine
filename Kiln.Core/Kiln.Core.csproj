@@ -9,12 +9,14 @@
     Headless tools must be able to use Kiln.Core plus a game's resource provider
     with no graphics device present. Keep both ItemGroups below empty.
 
-    Target framework is net8.0 with no -windows suffix, deliberately: it must stay
-    referenceable by the existing net8.0-windows projects while remaining OS-neutral.
+    Target framework is net10.0 with no -windows suffix, deliberately: a headless
+    tool or a test must be able to step this layer on any OS. It is set once in
+    Directory.Build.props, and rule 4 of the guard rejects an OS-specific suffix
+    here whether it is declared in this file or inherited from that one.
   -->
 
   <PropertyGroup>
-<!--     <TargetFramework>net8.0</TargetFramework>
+<!--     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks> -->
