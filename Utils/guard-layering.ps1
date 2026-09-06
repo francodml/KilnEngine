@@ -23,7 +23,9 @@ param()
 #        Kiln.Runtime        the host - window and input capture
 #        Kiln.Render.<api>   one project per backend - the graphics API itself
 #      Kiln.Core and Kiln.Render (the API-agnostic layer) may not have them.
-#   4. Kiln.Core targets no OS-specific framework (no -windows suffix).
+#   4. Kiln.Core targets no OS-specific framework (no -windows suffix), whether
+#      that framework is set in the project file or inherited from the nearest
+#      Directory.Build.props above it.
 #
 # The direction of dependency is the whole point of the split; enforce it in the
 # build rather than in review.
@@ -56,6 +58,61 @@ $usingDirectivePattern = '^\s*(?:global\s+)?using\s+(?:static\s+)?(?:[A-Za-z_]\w
 $builtinTypeKeywords = @('bool', 'byte', 'sbyte', 'char', 'decimal', 'double', 'float',
     'int', 'uint', 'nint', 'nuint', 'long', 'ulong', 'short', 'ushort',
     'object', 'string', 'dynamic', 'void')
+
+# Resolves the target framework(s) a project actually builds with, the way
+# MSBuild does: Directory.Build.props is imported above the project body, so a
+# framework set in the project file wins, and otherwise the nearest props file
+# on the way up supplies it. Reading the csproj alone is not enough - a project
+# that declares nothing is not portable, it is inheriting from somewhere.
+# Scope is Directory.Build.props only; a framework set in a .targets file, which
+# MSBuild imports after the project body, is not resolved here.
+# Returns objects carrying the defining file and the value, so a hit can name
+# the file the developer has to open.
+function Get-EffectiveFrameworkNodes {
+    param(
+        [System.IO.FileInfo] $Project,
+        [xml] $ProjectXml,
+        [string] $RepoRoot
+    )
+
+    $found = New-Object System.Collections.Generic.List[psobject]
+
+    $inProject = @(@($ProjectXml.SelectNodes("//TargetFramework")) + @($ProjectXml.SelectNodes("//TargetFrameworks")) |
+        Where-Object { $null -ne $_ })
+
+    if ($inProject.Count -gt 0) {
+        foreach ($node in $inProject) {
+            $found.Add([pscustomobject]@{ Source = $Project.FullName; Value = $node.InnerText })
+        }
+        return $found
+    }
+
+    # Walk up for the props file. MSBuild imports only the nearest one, so stop
+    # at the first that exists whether or not it defines a framework.
+    $directory = $Project.DirectoryName
+    while (-not [string]::IsNullOrEmpty($directory)) {
+        $props = Join-Path $directory "Directory.Build.props"
+        if (Test-Path -LiteralPath $props -PathType Leaf) {
+            [xml]$propsXml = Get-Content -LiteralPath $props -Raw
+            $nodes = @(@($propsXml.SelectNodes("//TargetFramework")) + @($propsXml.SelectNodes("//TargetFrameworks")) |
+                Where-Object { $null -ne $_ })
+            foreach ($node in $nodes) {
+                $found.Add([pscustomobject]@{ Source = $props; Value = $node.InnerText })
+            }
+            return $found
+        }
+
+        # The repo root bounds the walk: a props file outside the checkout is
+        # not something CI can see or this guard can speak for.
+        if ($directory.TrimEnd('\') -ieq $RepoRoot.TrimEnd('\')) { break }
+
+        $parent = Split-Path -Parent $directory
+        if ($parent -eq $directory) { break }
+        $directory = $parent
+    }
+
+    return $found
+}
 
 Push-Location $repoRoot
 try {
@@ -103,12 +160,23 @@ try {
         }
 
         if ($isCore) {
-            # 4. Kiln.Core stays OS-neutral.
-            $frameworkNodes = @($xml.SelectNodes("//TargetFramework")) + @($xml.SelectNodes("//TargetFrameworks"))
-            foreach ($node in $frameworkNodes) {
-                if ($null -eq $node) { continue }
-                if ($node.InnerText -match '-(windows|android|ios|maccatalyst|tvos)') {
-                    $hits.Add(("{0}: target framework '{1}' is OS-specific. Kiln.Core must target a portable framework." -f $relative, $node.InnerText))
+            # 4. Kiln.Core stays OS-neutral, whether the framework is declared in
+            #    the project file or inherited from a Directory.Build.props.
+            $frameworks = @(Get-EffectiveFrameworkNodes -Project $project -ProjectXml $xml -RepoRoot $repoRoot)
+            foreach ($framework in $frameworks) {
+                if ($null -eq $framework) { continue }
+                if ($framework.Value -notmatch '-(windows|android|ios|maccatalyst|tvos)') { continue }
+
+                $source = $framework.Source
+                if ($source.StartsWith($repoRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+                    $source = $source.Substring($repoRoot.Length).TrimStart('\')
+                }
+
+                if ($source -eq $relative) {
+                    $hits.Add(("{0}: target framework '{1}' is OS-specific. Kiln.Core must target a portable framework." -f $relative, $framework.Value))
+                }
+                else {
+                    $hits.Add(("{0}: target framework '{1}' inherited from {2} is OS-specific. Kiln.Core must target a portable framework." -f $relative, $framework.Value, $source))
                 }
             }
         }
