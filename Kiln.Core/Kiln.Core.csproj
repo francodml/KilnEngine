@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Kiln.Core — the engine's foundation layer.
+
+    Layering rule (docs/ENGINE_FROM_SCRATCH.md §12), enforced by tools/guard-layering.ps1:
+      * No Kiln.* project may reference OpenTS3.* or any other game project.
+      * Kiln.Core may not reference a device, window, or imaging library.
+    Headless tools must be able to use Kiln.Core plus a game's resource provider
+    with no graphics device present. Keep both ItemGroups below empty.
+
+    Target framework is net8.0 with no -windows suffix, deliberately: it must stay
+    referenceable by the existing net8.0-windows projects while remaining OS-neutral.
+  -->
+
+  <PropertyGroup>
+<!--     <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks> -->
+    <RootNamespace>Kiln.Core</RootNamespace>
+    <AssemblyName>Kiln.Core</AssemblyName>
+    <Description>General-purpose engine core: entities, components, transforms, time, resource identity.</Description>
+  </PropertyGroup>
+
+  <!-- Intentionally empty. See the layering rule above. -->
+  <ItemGroup>
+  </ItemGroup>
+
+  <ItemGroup>
+  </ItemGroup>
+
+  <!-- Provisional layout; folders exist so the shape is visible before the types land. -->
+  <ItemGroup>
+    <Folder Include="Resources\" />
+    <Folder Include="Time\" />
+    <Folder Include="Input\" />
+    <Folder Include="Diagnostics\" />
+    <Folder Include="Maths\" />
+  </ItemGroup>
+
+</Project>

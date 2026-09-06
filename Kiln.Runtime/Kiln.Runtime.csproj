@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Kiln.Runtime — the host.
+
+    Owns the window, device creation, backend selection, input capture, the threads,
+    the channels between them, the frame loop, IGame and the application lifecycle.
+    This is the only project in the engine that knows concurrency exists: Kiln.Core and
+    Kiln.Render are single-threaded libraries, which is what lets a headless tool or a
+    test step the same simulation synchronously on the calling thread.
+
+    A game never creates a window, selects a backend, or writes a frame loop. It
+    implements IGame and is handed to KilnHost.
+
+    Layering rule (docs/ENGINE_FROM_SCRATCH.md §12), enforced by tools/guard-layering.ps1:
+      * No Kiln.* project may reference OpenTS3.* or any other game project.
+      * This project may take window and input dependencies; it must not take a
+        graphics API dependency, which belongs to a Kiln.Render.<api> backend.
+  -->
+
+  <PropertyGroup>
+<!--     <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks> -->
+    <RootNamespace>Kiln.Runtime</RootNamespace>
+    <AssemblyName>Kiln.Runtime</AssemblyName>
+    <Description>Engine host: window, threads, channels, frame loop, IGame, application lifecycle.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kiln.Core\Kiln.Core.csproj" />
+    <ProjectReference Include="..\Kiln.Render\Kiln.Render.csproj" />
+  </ItemGroup>
+
+  <!--
+    Windowing and input packages land here when KilnHost is written (§1, §9).
+    Deliberately empty until something uses them.
+  -->
+  <ItemGroup>
+  </ItemGroup>
+
+  <!-- Provisional layout; folders exist so the shape is visible before the types land. -->
+  <ItemGroup>
+    <Folder Include="Hosting\" />
+    <Folder Include="Threading\" />
+    <Folder Include="Input\" />
+    <Folder Include="Composition\" />
+  </ItemGroup>
+
+</Project>

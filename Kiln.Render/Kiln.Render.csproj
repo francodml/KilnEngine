@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Kiln.Render — describes rendering; performs none of it.
+
+    Owns the render-side retained model: RenderScene, RenderProxy, delta application,
+    culling, views, the frame packet, pass registration, and the IRenderDevice contract.
+    It does not own the render thread (Kiln.Runtime does) and it contains no graphics
+    API calls — those live only in a Kiln.Render.<api> backend project, which is the
+    single place a GL/Vulkan/D3D symbol may appear.
+
+    Layering rule (docs/ENGINE_FROM_SCRATCH.md §12), enforced by tools/guard-layering.ps1:
+      * No Kiln.* project may reference OpenTS3.* or any other game project.
+      * Only Kiln.Runtime and Kiln.Render.<api> may reference a device or window library.
+  -->
+
+  <PropertyGroup>
+<!--     <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks> -->
+    <RootNamespace>Kiln.Render</RootNamespace>
+    <AssemblyName>Kiln.Render</AssemblyName>
+    <Description>Engine render layer: retained render scene, extraction, views, passes, device contract.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kiln.Core\Kiln.Core.csproj" />
+  </ItemGroup>
+
+  <!-- No PackageReference. See the layering rule above. -->
+
+  <!-- Provisional layout; folders exist so the shape is visible before the types land. -->
+  <ItemGroup>
+    <Folder Include="Scene\" />
+    <Folder Include="Extraction\" />
+    <Folder Include="Views\" />
+    <Folder Include="Passes\" />
+    <Folder Include="Materials\" />
+    <Folder Include="Devices\" />
+  </ItemGroup>
+
+</Project>

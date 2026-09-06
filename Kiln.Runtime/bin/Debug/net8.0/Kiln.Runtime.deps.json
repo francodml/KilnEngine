@@ -1,0 +1,56 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "Kiln.Runtime/1.0.0": {
+        "dependencies": {
+          "Kiln.Core": "1.0.0",
+          "Kiln.Render": "1.0.0"
+        },
+        "runtime": {
+          "Kiln.Runtime.dll": {}
+        }
+      },
+      "Kiln.Core/1.0.0": {
+        "runtime": {
+          "Kiln.Core.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Kiln.Render/1.0.0": {
+        "dependencies": {
+          "Kiln.Core": "1.0.0"
+        },
+        "runtime": {
+          "Kiln.Render.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Kiln.Runtime/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Kiln.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Kiln.Render/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

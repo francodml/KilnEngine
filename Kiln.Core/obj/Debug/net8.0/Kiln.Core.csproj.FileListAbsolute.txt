@@ -1,0 +1,12 @@
+F:\Games\The Sims 3\OpenSims3\Kiln.Core\bin\Debug\net8.0\Kiln.Core.deps.json
+F:\Games\The Sims 3\OpenSims3\Kiln.Core\bin\Debug\net8.0\Kiln.Core.dll
+F:\Games\The Sims 3\OpenSims3\Kiln.Core\bin\Debug\net8.0\Kiln.Core.pdb
+F:\Games\The Sims 3\OpenSims3\Kiln.Core\obj\Debug\net8.0\Kiln.Core.GeneratedMSBuildEditorConfig.editorconfig
+F:\Games\The Sims 3\OpenSims3\Kiln.Core\obj\Debug\net8.0\Kiln.Core.AssemblyInfoInputs.cache
+F:\Games\The Sims 3\OpenSims3\Kiln.Core\obj\Debug\net8.0\Kiln.Core.AssemblyInfo.cs
+F:\Games\The Sims 3\OpenSims3\Kiln.Core\obj\Debug\net8.0\Kiln.Core.csproj.CoreCompileInputs.cache
+F:\Games\The Sims 3\OpenSims3\Kiln.Core\obj\Debug\net8.0\Kiln.Core.sourcelink.json
+F:\Games\The Sims 3\OpenSims3\Kiln.Core\obj\Debug\net8.0\Kiln.Core.dll
+F:\Games\The Sims 3\OpenSims3\Kiln.Core\obj\Debug\net8.0\refint\Kiln.Core.dll
+F:\Games\The Sims 3\OpenSims3\Kiln.Core\obj\Debug\net8.0\Kiln.Core.pdb
+F:\Games\The Sims 3\OpenSims3\Kiln.Core\obj\Debug\net8.0\ref\Kiln.Core.dll
