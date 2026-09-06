@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="Kiln.Core/Kiln.Core.csproj" />
+  <Project Path="Kiln.Render.OpenGL/Kiln.Render.OpenGL.csproj" />
   <Project Path="Kiln.Render/Kiln.Render.csproj" />
   <Project Path="Kiln.Runtime/Kiln.Runtime.csproj" />
 </Solution>

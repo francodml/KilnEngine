@@ -1,8 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Kiln.Render.OpenGL</RootNamespace>
+        <AssemblyName>Kiln.Render.OpenGL</AssemblyName>
+        <Description>OpenGL rendering backend for KilnEngine</Description>
+    </PropertyGroup>
 
 </Project>
