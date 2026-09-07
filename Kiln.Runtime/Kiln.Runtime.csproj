@@ -37,15 +37,14 @@
     Windowing and input packages land here when KilnHost is written (§1, §9).
     Deliberately empty until something uses them.
   -->
-  <ItemGroup>
-  </ItemGroup>
 
   <!-- Provisional layout; folders exist so the shape is visible before the types land. -->
   <ItemGroup>
-    <Folder Include="Hosting\" />
-    <Folder Include="Threading\" />
-    <Folder Include="Input\" />
     <Folder Include="Composition\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Silk.NET.Input" Version="2.23.0" />
+    <PackageReference Include="Silk.NET.Windowing.Glfw" Version="2.23.0" />
   </ItemGroup>
 
 </Project>
