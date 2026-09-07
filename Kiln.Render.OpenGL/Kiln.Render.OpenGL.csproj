@@ -8,4 +8,8 @@
         <Description>OpenGL rendering backend for KilnEngine</Description>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Silk.NET.OpenGL" Version="2.23.0" />
+    </ItemGroup>
+
 </Project>
