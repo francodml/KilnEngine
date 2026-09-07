@@ -20,7 +20,7 @@ public readonly record struct EntityId(uint Index, uint Generation)
 
 /// <summary>
 /// Identifies a registered component type. Assigned by
-/// <see cref="World.Register{T}"/> in registration order, and used as the bit position
+/// <see cref="World.RegisterComponent{T}"/> in registration order, and used as the bit position
 /// in an entity's presence mask.
 /// </summary>
 public readonly record struct ComponentTypeId(ushort Value)

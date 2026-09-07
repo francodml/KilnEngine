@@ -1,5 +1,3 @@
-using System.Numerics;
-
 using Kiln.Core.Transforms;
 
 namespace Kiln.Core.Entities;
@@ -18,10 +16,10 @@ namespace Kiln.Core.Entities;
 /// <c>Kiln.Runtime</c>'s job.
 ///
 /// The engine ships two component types (Transform, Renderable). Every other component is
-/// registered by the game through <see cref="Register{T}"/> and is a first-class citizen:
+/// registered by the game through <see cref="RegisterComponent{T}"/> and is a first-class citizen:
 /// same storage, same change feed, same serializer hook.
 /// </remarks>
-public sealed class World
+public sealed partial class World
 {
     /// <summary>
     /// Component types are bit positions in a single-word presence mask.
@@ -62,168 +60,6 @@ public sealed class World
     public int EntityCount { get; private set; }
 
     public IReadOnlyCollection<EntityGroup> Groups => _groups.Values;
-
-    // ═══ Entities ══════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Creates an entity with no components, belonging to <paramref name="group"/>.
-    /// </summary>
-    /// <remarks>
-    /// The specification writes this as <c>Create(EntityGroup)</c>. It takes a
-    /// <see cref="GroupId"/> instead so callers cannot retain a mutable group object;
-    /// resolving the id is one dictionary hit.
-    /// </remarks>
-    public EntityId Create(GroupId group)
-    {
-        if (!_groups.TryGetValue(group, out var target))
-            throw new ArgumentException($"{group} does not exist.", nameof(group));
-
-        uint index = _free.Count > 0 ? _free.Pop() : _highWater++;
-        EnsureEntityCapacity(index);
-
-        _alive[index]    = true;
-        _group[index]    = group;
-        _presence[index] = 0;
-
-        var id = new EntityId(index, _generation[index]);
-        target.Add(id);
-        Transforms.Add(id);
-        EntityCount++;
-        return id;
-    }
-
-    /// <summary>Creates an entity and lets a definition decide what it is born with.</summary>
-    public EntityId Create(GroupId group, IEntityDefinition definition)
-    {
-        var id = Create(group);
-        definition.Instantiate(this, id);
-        return id;
-    }
-
-    /// <summary>
-    /// Destroys an entity, removing every component it holds and bumping its generation so
-    /// ids held elsewhere become detectably stale.
-    /// </summary>
-    public void Destroy(EntityId id)
-    {
-        if (!IsAlive(id)) return;
-
-        ulong mask = _presence[id.Index];
-        while (mask != 0)
-        {
-            int type = BitOperations.TrailingZeroCount(mask);
-            mask &= mask - 1;
-
-            _stores[type]!.Remove(id);
-            _changes.Record(new ComponentTypeId((ushort)type), ChangeKind.Removed, id);
-        }
-
-        if (_groups.TryGetValue(_group[id.Index], out var group))
-            group.Remove(id);
-
-        Transforms.Remove(id);
-
-        _alive[id.Index]    = false;
-        _presence[id.Index] = 0;
-        _group[id.Index]    = GroupId.None;
-        _generation[id.Index]++;              // any id still holding the old value now fails IsAlive
-        _free.Push(id.Index);
-        EntityCount--;
-    }
-
-    public bool IsAlive(EntityId id) =>
-        id.Index < _highWater && _alive[id.Index] && _generation[id.Index] == id.Generation;
-
-    public GroupId GroupOf(EntityId id) =>
-        IsAlive(id) ? _group[id.Index] : GroupId.None;
-
-    /// <summary>Façade over one entity. Convenience, not the iteration path.</summary>
-    public Entity Entity(EntityId id) => new(this, id);
-
-    // ═══ Components ════════════════════════════════════════════════════════
-
-    /// <summary>
-    /// Registers a component type and returns its id. Idempotent: registering the same
-    /// type twice returns the first id rather than creating a second store.
-    /// </summary>
-    /// <param name="serializer">
-    /// Optional persistence hook. A type without one is not written to a group's save record.
-    /// </param>
-    public ComponentTypeId Register<T>(IComponentSerializer<T>? serializer = null) where T : struct
-    {
-        if (_typeIds.TryGetValue(typeof(T), out var existing))
-            return existing;
-
-        if (_typeCount == MaxComponentTypes)
-            throw new InvalidOperationException(
-                $"At most {MaxComponentTypes} component types may be registered.");
-
-        var typeId = new ComponentTypeId(_typeCount++);
-        _stores[typeId.Value] = new Store<T>(typeId, serializer);
-        _typeIds[typeof(T)] = typeId;
-        _changes.RegisterType(typeId);
-        return typeId;
-    }
-
-    public bool IsRegistered<T>() where T : struct => _typeIds.ContainsKey(typeof(T));
-
-    /// <summary>The dense store for a registered component type.</summary>
-    public Store<T> Store<T>() where T : struct =>
-        _typeIds.TryGetValue(typeof(T), out var id)
-            ? (Store<T>)_stores[id.Value]!
-            : throw new InvalidOperationException(
-                $"{typeof(T).Name} is not registered. Call World.Register<{typeof(T).Name}>() during game configuration.");
-
-    public bool Has<T>(EntityId id) where T : struct =>
-        IsAlive(id) && (_presence[id.Index] & Bit(Store<T>().TypeId)) != 0;
-
-    /// <summary>
-    /// Adds or overwrites a component and returns it by reference.
-    /// </summary>
-    /// <remarks>
-    /// Add and Remove go through the world rather than the store so the presence mask and
-    /// the change feed stay consistent with the storage. Mutating in place does not, which
-    /// is why <see cref="Store{T}.Ref"/> is public.
-    /// </remarks>
-    public ref T Add<T>(EntityId id, in T value) where T : struct
-    {
-        if (!IsAlive(id))
-            throw new InvalidOperationException($"{id} is not alive.");
-
-        var store = Store<T>();
-        bool isNew = !store.Has(id);
-
-        ref T slot = ref store.Add(id, value);
-
-        _presence[id.Index] |= Bit(store.TypeId);
-        _changes.Record(store.TypeId, isNew ? ChangeKind.Added : ChangeKind.Changed, id);
-        return ref slot;
-    }
-
-    public bool Remove<T>(EntityId id) where T : struct
-    {
-        var store = Store<T>();
-        if (!store.Remove(id)) return false;
-
-        _presence[id.Index] &= ~Bit(store.TypeId);
-        _changes.Record(store.TypeId, ChangeKind.Removed, id);
-        return true;
-    }
-
-    /// <summary>
-    /// Announces that a component mutated in place, so the change reaches the feed.
-    /// </summary>
-    /// <remarks>
-    /// The cost of dense storage plus by-reference mutation: the world cannot observe a
-    /// write through <see cref="Store{T}.Ref"/>. A system that mutates and wants extraction
-    /// to notice says so. TODO(§6): transforms avoid this via their own dirty flag; decide
-    /// whether other hot components deserve the same rather than a feed entry.
-    /// </remarks>
-    public void Touch<T>(EntityId id) where T : struct
-    {
-        if (Has<T>(id))
-            _changes.Record(Store<T>().TypeId, ChangeKind.Changed, id);
-    }
 
     // ═══ Groups ════════════════════════════════════════════════════════════
 

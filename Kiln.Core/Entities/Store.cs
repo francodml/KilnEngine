@@ -12,7 +12,7 @@ public interface IStore
     int Count { get; }
     bool Has(EntityId id);
 
-    /// <summary>Removes the component if present. Called by <see cref="World.Destroy"/>.</summary>
+    /// <summary>Removes the component if present. Called by <see cref="World.DestroyEntity"/>.</summary>
     bool Remove(EntityId id);
 }
 

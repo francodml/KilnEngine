@@ -34,9 +34,7 @@
 
   <!-- Provisional layout; folders exist so the shape is visible before the types land. -->
   <ItemGroup>
-    <Folder Include="Resources\" />
     <Folder Include="Time\" />
-    <Folder Include="Input\" />
     <Folder Include="Diagnostics\" />
     <Folder Include="Maths\" />
   </ItemGroup>

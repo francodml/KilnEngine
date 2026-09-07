@@ -18,15 +18,15 @@ public readonly struct Entity(World world, EntityId id)
 
     public GroupId Group => World.GroupOf(Id);
 
-    public bool Has<T>() where T : struct => World.Has<T>(Id);
+    public bool HasComponent<T>() where T : struct => World.HasComponent<T>(Id);
 
-    public ref T Get<T>() where T : struct => ref World.Store<T>().Ref(Id);
+    public ref T GetComponent<T>() where T : struct => ref World.Store<T>().Ref(Id);
 
-    public ref T Add<T>(in T value) where T : struct => ref World.Add(Id, value);
+    public ref T AddComponent<T>(in T value) where T : struct => ref World.AddComponent(Id, value);
 
-    public bool Remove<T>() where T : struct => World.Remove<T>(Id);
+    public bool RemoveComponent<T>() where T : struct => World.RemoveComponent<T>(Id);
 
-    public void Destroy() => World.Destroy(Id);
+    public void Destroy() => World.DestroyEntity(Id);
 
     public override string ToString() => Id.ToString();
 }
