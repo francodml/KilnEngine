@@ -15,9 +15,10 @@ namespace Kiln.Core.Entities;
 /// calling thread. Nothing here starts a thread or takes a lock — that is
 /// <c>Kiln.Runtime</c>'s job.
 ///
-/// The engine ships two component types (Transform, Renderable). Every other component is
-/// registered by the game through <see cref="RegisterComponent{T}"/> and is a first-class citizen:
-/// same storage, same change feed, same serializer hook.
+/// The engine ships component types for the facilities most games use (Transform, Renderable,
+/// Camera; §4). Every other component is registered by the game through
+/// <see cref="RegisterComponent{T}"/>. Engine types get no privileges: every registered type has
+/// the same storage, the same change feed, and the same serializer hook.
 /// </remarks>
 public sealed partial class World
 {

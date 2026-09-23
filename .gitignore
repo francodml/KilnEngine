@@ -1,5 +1,6 @@
 ## ===KilnEngine===
-docs-local/
+#docs-local/
+#/CLAUDE.md
 
 ## ===VISUAL STUDIO===
 ## SOURCE: https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
@@ -436,4 +437,3 @@ FodyWeavers.xsd
 
 # Official VS Code C# Dev Kit Extension exclusion
 #*.lscache
-/CLAUDE.md
